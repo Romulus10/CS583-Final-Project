@@ -1,5 +1,5 @@
 """
-Adapted from "The Implementation of Optical Flow in Neural Networks", Nicole Ku'ulei-lani Flett
+Adapted from "The Implementation of Optical Flow in Neural Networks", Nicole Ku'ulei-lani Flett http://nrs.harvard.edu/urn-3:HUL.InstRepos:39011510
 """
 
 import pickle
