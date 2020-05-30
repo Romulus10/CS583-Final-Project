@@ -8,7 +8,7 @@ from keras.models import model_from_yaml
 import cv2
 
 
-def loadNN(model_file,weights_file):
+def loadNN(model_file, weights_file):
     yaml_file = open(model_file, 'r')
     loaded_model_yaml = yaml_file.read()
     yaml_file.close()
@@ -25,9 +25,9 @@ def LK(frame1, frame2, model):
     nn_input.resize((28, 28))
     nn_input = np.reshape(nn_input, (1, 28, 28, -1))
     nn_output = model.predict(nn_input)
-    print nn_output
+    print(nn_output)
     LKvector = [nn_output[0][1]-nn_output[0][0], nn_output[0][3]- nn_output[0][2], nn_output[0][5]-nn_output[0][4]]
-    print LKvector
+    print(LKvector)
     return LKvector
 
 

@@ -10,8 +10,6 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from PIL import Image
 
-
-print("[INFO] loading images...")
 image_data = np.loadtxt("train-data.csv",delimiter="\n",dtype=str)
 for i in range(0,len(image_data)):
     if (i+1)%3 != 0:
@@ -29,80 +27,50 @@ while x < len(image_data)-4:
     axis=0, horiz is axis=1
     vis.resize((28,28))
     inputs.append(vis)
-    label = [float(i) for i in image_data[x+2].split(',') if i.isdigit() ]
+    label = [float(i) for i in image_data[x+2].split(',') if i.isdigit()]
     outputs.append(label)
     x+=3
 
 inputs = np.array(inputs, dtype="float") / 255.0
 outputs = np.array(outputs)
-print "input shape:", inputs.shape
-print "output shape: ", outputs.shape
 
-(trainX, testX, trainY, testY) = train_test_split(inputs, outputs,
-test_size=0.25)
-print trainX.shape
+(trainX, testX, trainY, testY) = train_test_split(inputs, outputs, test_size=0.25)
 
 trainX = np.reshape(trainX, (trainX.shape[0],28,28,-1))
-print "trainx shape:", trainX.shape
-print "trainy shape: ", trainY.shape
 testX = np.reshape(testX, (testX.shape[0],28,28,-1))
-print "testx shape:", testX.shape
-print "testy shape:", testY.shape
 
 bs = 10
-print("[INFO] compiling model...")
 model = Sequential()
 model.add(Conv2D(32, (5, 5), data_format='channels_last',
 input_shape=(28,28,1)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-print "[x]"
 model.add(Conv2D(64, (3, 3)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-print "[xx]"
 model.add(Conv2D(64, (3, 3)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-print model.output_shape
-
-print "[xxx]"
 model.add(Flatten())
-vectors
-print model.output_shape
 model.add(Dense(64))
 model.add(Activation('relu'))
-print "[xxxx]"
 model.add(Dense(32))
 model.add(Activation('relu'))
-print "[xxxxx]"
 model.add(Dropout(0.5))
 model.add(Dense(6))
 model.add(Activation('sigmoid'))
-print "[xxxxxx]"
 model.compile(loss='binary_crossentropy', optimizer='sgd',
 metrics=['accuracy'])
-print "[xxxxxxx]"
-
-print "[INFO] fitting model..."
 
 history = model.fit(trainX,trainY, epochs=100, batch_size=bs, verbose=1)
 
 pickle.dump(history.history, open('save4.p','wb'))
 
-print "[INFO] evaluating model..."
 score_train = model.evaluate(trainX, trainY, batch_size=bs, verbose=1)
-print "Accuracy for trained set: ", score_train[1]*100
 score_test = model.evaluate(testX, testY, batch_size=bs, verbose=1)
-print "Accuracy for test set: ", score_test[1]*100
-
-print("[INFO] saving network weights...")
 
 model_yaml = model.to_yaml()
 with open("model4.yaml", "w") as yaml_file:
     yaml_file.write(model_yaml)
 
 model.save_weights("model4.h5")
-print("Saved model to disk")
-
-print("Yay!")

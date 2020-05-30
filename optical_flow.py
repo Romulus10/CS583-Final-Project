@@ -9,11 +9,6 @@ import imageio
 import numpy as np
 from scipy.ndimage.filters import convolve
 
-# Displacements are by default saved to a file after every run. Once you have confirmed your
-# LK code is working, you can load saved displacements to save time testing the
-# rest of the project.
-DEFAULT_DISPLACEMENTS_FILE = "final_displacements.pkl"
-
 
 def bilinear_interp(image, points):
     """Given an image and an array of row/col (Y/X) points, perform bilinear
