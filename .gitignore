@@ -2,3 +2,16 @@
 __pycache__/
 .idea
 venv
+paper/OpticalFlow.aux
+paper/OpticalFlow.bbl
+paper/OpticalFlow.bcf
+paper/OpticalFlow.blg
+paper/OpticalFlow.fls
+paper/OpticalFlow.fdb_latexmk
+paper/OpticalFlow.lot
+paper/OpticalFlow.run copy.xml
+paper/OpticalFlow.lof
+paper/OpticalFlow.log
+paper/OpticalFlow.pdf
+paper/OpticalFlow.run.xml
+paper/OpticalFlow.synctex.gz

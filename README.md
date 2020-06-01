@@ -2,7 +2,6 @@
 
 Optical Flow in Neural Networks
 
-
 Abstract:
 
 Optical flow is a method of estimation of the relative positions or apparent motion of objects in
