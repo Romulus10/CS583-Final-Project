@@ -33,9 +33,9 @@ def bilinear_interp(image, points):
     a = fpart[..., 1:2]
 
     top = (1 - a) * image[tl[..., 0], tl[..., 1]] + \
-          a * image[tr[..., 0], tr[..., 1]]
+        a * image[tr[..., 0], tr[..., 1]]
     bot = (1 - a) * image[bl[..., 0], bl[..., 1]] + \
-          a * image[br[..., 0], br[..., 1]]
+        a * image[br[..., 0], br[..., 1]]
     return ((1 - b) * top + b * bot) * valid[..., np.newaxis]
 
 
@@ -43,7 +43,8 @@ def translate(image, displacement):
     """Takes an image and a displacement of the form X,Y and translates the
     image by the displacement. The shape of the output is the same as the
     input, with missing pixels filled in with zeros."""
-    pts = np.mgrid[:image.shape[0], :image.shape[1]].transpose(1, 2, 0).astype(np.float32)
+    pts = np.mgrid[:image.shape[0], :image.shape[1]
+                   ].transpose(1, 2, 0).astype(np.float32)
     pts -= displacement[::-1]
 
     return bilinear_interp(image, pts)
@@ -72,7 +73,8 @@ def gaussian_kernel(ksize=5):
     """
     Computes a 2-d gaussian kernel of size ksize and returns it.
     """
-    kernel = np.exp(-np.linspace(-(ksize // 2), ksize // 2, ksize) ** 2 / 2) / np.sqrt(2 * np.pi)
+    kernel = np.exp(-np.linspace(-(ksize // 2), ksize // 2,
+                                 ksize) ** 2 / 2) / np.sqrt(2 * np.pi)
     kernel = np.outer(kernel, kernel)
     kernel /= kernel.sum()
     return kernel
@@ -109,7 +111,7 @@ def lucas_kanade(H, I):
     # Compute the partial image derivatives w.r.t. X, Y, and Time (t).
     # In other words, compute I_y, I_x, and I_t
     # To achieve this, use a _normalized_ 3x3 sobel kernel and the convolve_img
-    # function above. NOTE: since you're convolving the kernel, you need to 
+    # function above. NOTE: since you're convolving the kernel, you need to
     # multiply it by -1 to get the proper direction.
     kernel_x = np.array([[1., 0., -1.],
                          [2., 0., -2.],
@@ -217,7 +219,8 @@ def pyramid_lucas_kanade(H, I, initial_d, levels, steps):
 
         # Scale the previous level's displacement and apply it to one of the
         # images via translation.
-        level_I_displaced = translate(level_I, -disp)  # If I don't do -disp, it fails all the unit tests
+        # If I don't do -disp, it fails all the unit tests
+        level_I_displaced = translate(level_I, -disp)
 
         # Use the iterative Lucas Kanade method to compute a displacement
         # between the two images at this level.
@@ -255,62 +258,16 @@ def track_object(frame1, frame2, boundingBox, steps):
     # Compute the optical flow using the pyramid_lucas_kanade function
     flow = pyramid_lucas_kanade(H, I, initial_displacement, levels, steps)
 
-    return flow
+    final_flow = np.array([0, 0, 0, 0, 0, 0])
 
+    if flow[0] < 0:
+        final_flow[0] = abs(flow[0])
+    elif flow[0] > 0:
+        final_flow[1] = abs(flow[0])
+    
+    if flow[1] < 0:
+        final_flow[2] = abs(flow[1])
+    elif flow[1] > 0:
+        final_flow[3] = abs(flow[1])
 
-def visualize(first, firstBB, second, secondBB):
-    import matplotlib
-    import matplotlib.pyplot as plt
-
-    f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
-
-    # Show the source image
-    ax1.imshow(first)
-    ax1.set_title('First Frame')
-    rect = matplotlib.patches.Rectangle(
-        (firstBB[0], firstBB[1]), firstBB[2], firstBB[3], edgecolor='r', facecolor="none")
-    ax1.add_patch(rect)
-
-    # Show the second
-    ax2.imshow(second)
-    ax2.set_title('Second Frame')
-    rect = matplotlib.patches.Rectangle(
-        (secondBB[0], secondBB[1]), secondBB[2], secondBB[3], edgecolor='r', facecolor="none")
-    ax2.add_patch(rect)
-
-    plt.show()
-
-
-if __name__ == "__main__":
-    logging.basicConfig(
-        format='%(levelname)s: %(message)s', level=logging.INFO)
-    parser = argparse.ArgumentParser(
-        description='Tracks an object between two images by computing the optical flow using lucas kanade.')
-    parser.add_argument(
-        'firstFrame', type=str, help='The first image in the sequence.')
-    parser.add_argument(
-        'secondFrame', type=str, help='The second image in the sequence.')
-    parser.add_argument('--boundingBox', type=str,
-                        help='The bounding box of the object in x,y,w,h format', default='304,329,106,58')
-    parser.add_argument('--steps', type=int,
-                        help='The number of steps to use', default=5)
-    parser.add_argument('--visualize',
-                        help='Visualize the results', action='store_true')
-    args = parser.parse_args()
-
-    # load the images and parse out the bounding box.
-    boundingBox = np.array([int(x) for x in args.boundingBox.split(',')])
-    first = imageio.imread(args.firstFrame)[
-            :, :, :3].astype(np.float32) / 255.0
-    second = imageio.imread(args.secondFrame)[
-             :, :, :3].astype(np.float32) / 255.0
-    flow = track_object(first, second, boundingBox, args.steps)
-
-    # Use the flow to move the bouding box.
-    resultBoundingBox = boundingBox.copy().astype(np.float32)
-    resultBoundingBox[0:2] += flow
-
-    print('tracked object to have moved %s to %s' % (str(flow), str((resultBoundingBox[0], resultBoundingBox[1]))))
-
-    if args.visualize:
-        visualize(first, boundingBox, second, resultBoundingBox)
+    return final_flow
