@@ -38,7 +38,7 @@ outputs = np.array(outputs)
 trainX = np.reshape(trainX, (trainX.shape[0],28,28,-1))
 testX = np.reshape(testX, (testX.shape[0],28,28,-1))
 
-bs = 10
+bs = 32                                                    #default batch size
 model = Sequential()
 model.add(Conv2D(32, (5, 5), data_format='channels_last',
 input_shape=(28,28,1)))
