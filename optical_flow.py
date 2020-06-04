@@ -195,4 +195,6 @@ def prepare_dataset(files_list, result_file, x, y, w, h, steps=5):
         for i in range(len(files_list) - 1):
             flow_vector = run_lk(files_list[i], files_list[i + 1], x + flow_vector[0] +
                                  flow_vector[1], y + flow_vector[2] + flow_vector[3], w, h, steps)
-            writer.writerow([files_list[i], files_list[i + 1]] + flow_vector)
+            writer.writerow([files_list[i]])
+            writer.writerow([files_list[i + 1]])
+            writer.writerow(flow_vector)
