@@ -26,14 +26,15 @@ def LK(frame1, frame2, model):
     nn_input = np.reshape(nn_input, (1, 28, 28, -1))
     nn_output = model.predict(nn_input)
     print(nn_output)
-    LKvector = [nn_output[0][1]-nn_output[0][0], nn_output[0][3]- nn_output[0][2], nn_output[0][5]-nn_output[0][4]]
+    LKvector = [nn_output[0][1]-nn_output[0][0], nn_output[0]
+                [3] - nn_output[0][2], nn_output[0][5]-nn_output[0][4]]
     print(LKvector)
     return LKvector
 
 
 def run_network():
     recording = []
-    mod = loadNN('model.yaml','model.h5')
+    mod = loadNN('model.yaml', 'model.h5')
     cap = cv2.VideoCapture(1)
     ret1, frame1 = cap.read()
     ret2, frame2 = cap.read()
