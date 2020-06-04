@@ -178,19 +178,21 @@ def track_object(frame1, frame2, x, y, w, h, steps):
     return final_flow
 
 
-def run_lk(firstFrame, secondFrame, x, y, w, h, steps):
-    first = imageio.imread(firstFrame)[
+def run_lk(first_frame, second_frame, x, y, w, h, steps):
+    first = imageio.imread(first_frame)[
         :, :, :3].astype(np.float32) / 255.0
-    second = imageio.imread(secondFrame)[
+    second = imageio.imread(second_frame)[
         :, :, :3].astype(np.float32) / 255.0
-    return track_object(first, second, x, y, w, h, steps)
+    return track_object(first, second, int(x), int(y), int(w), int(h), steps)
 
 
 def prepare_dataset(files_list, result_file, x, y, w, h, steps=5):
     import csv
+    flow_vector = [0, 0, 0, 0, 0, 0]
     with open(result_file, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
         for i in range(len(files_list) - 1):
-            writer.writerow([files_list[i], files_list[i + 1]] +
-                            run_lk(files_list[i], files_list[i + 1], x, y, w, h, steps))
+            flow_vector = run_lk(files_list[i], files_list[i + 1], x + flow_vector[0] +
+                                 flow_vector[1], y + flow_vector[2] + flow_vector[3], w, h, steps)
+            writer.writerow([files_list[i], files_list[i + 1]] + flow_vector)
