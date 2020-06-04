@@ -14,7 +14,7 @@ from PIL import Image
 def train():
     image_data = np.loadtxt("train-data.csv", delimiter="\n", dtype=str)
     for i in range(0, len(image_data)):
-        if (i+1) % 3 != 0:
+        if (i + 1) % 3 != 0:
             image_data[i] = image_data[i].replace(',', '')
             image_data[i] = image_data[i].replace('\\', '/')
 
@@ -22,13 +22,12 @@ def train():
     outputs = []
 
     x = 0
-    while x < len(image_data)-4:
+    while x < len(image_data) - 4:
         img1 = Image.open(image_data[x]).convert(mode='L')
         img2 = Image.open(image_data[x + 1]).convert(mode='L')
         vis = np.concatenate((img1, img2), axis=0)
-        vis.resize((28, 28))
         inputs.append(vis)
-        label = [float(i) for i in image_data[x+2].split(',') if i.isdigit()]
+        label = [float(i) for i in image_data[x + 2].split(',') if i.isdigit()]
         outputs.append(label)
         x += 3
 
@@ -76,3 +75,7 @@ def train():
         yaml_file.write(model_yaml)
 
     model.save_weights("model4.h5")
+
+
+if __name__ == '__main__':
+    train()
