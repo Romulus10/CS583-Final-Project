@@ -10,66 +10,67 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from PIL import Image
 
-image_data = np.loadtxt("train-data.csv",delimiter="\n",dtype=str)
-for i in range(0,len(image_data)):
-    if (i+1)%3 != 0:
-        image_data[i] = image_data[i].replace(',','')
-        image_data[i] = image_data[i].replace('\\','/')
+def train():
+    image_data = np.loadtxt("train-data.csv",delimiter="\n",dtype=str)
+    for i in range(0,len(image_data)):
+        if (i+1)%3 != 0:
+            image_data[i] = image_data[i].replace(',','')
+            image_data[i] = image_data[i].replace('\\','/')
 
-inputs = []
-outputs = []
+    inputs = []
+    outputs = []
 
-x = 0
-while x < len(image_data)-4:
-    img1 = Image.open(image_data[x]).convert(mode='L')
-    img2 = Image.open(image_data[x+ 1]).convert(mode='L')
-    vis = np.concatenate((img1, img2), axis=0)
-    vis.resize((28,28))
-    inputs.append(vis)
-    label = [float(i) for i in image_data[x+2].split(',') if i.isdigit()]
-    outputs.append(label)
-    x+=3
+    x = 0
+    while x < len(image_data)-4:
+        img1 = Image.open(image_data[x]).convert(mode='L')
+        img2 = Image.open(image_data[x+ 1]).convert(mode='L')
+        vis = np.concatenate((img1, img2), axis=0)
+        vis.resize((28,28))
+        inputs.append(vis)
+        label = [float(i) for i in image_data[x+2].split(',') if i.isdigit()]
+        outputs.append(label)
+        x+=3
 
-inputs = np.array(inputs, dtype="float") / 255.0
-outputs = np.array(outputs)
+    inputs = np.array(inputs, dtype="float") / 255.0
+    outputs = np.array(outputs)
 
-(trainX, testX, trainY, testY) = train_test_split(inputs, outputs, test_size=0.25)
+    (trainX, testX, trainY, testY) = train_test_split(inputs, outputs, test_size=0.25)
 
-trainX = np.reshape(trainX, (trainX.shape[0],28,28,-1))
-testX = np.reshape(testX, (testX.shape[0],28,28,-1))
+    trainX = np.reshape(trainX, (trainX.shape[0],28,28,-1))
+    testX = np.reshape(testX, (testX.shape[0],28,28,-1))
 
-bs = 32                                                    #default batch size
-model = Sequential()
-model.add(Conv2D(32, (5, 5), data_format='channels_last',
-input_shape=(28,28,1)))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(64, (3, 3)))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(64, (3, 3)))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Flatten())
-model.add(Dense(64))
-model.add(Activation('relu'))
-model.add(Dense(32))
-model.add(Activation('relu'))
-model.add(Dropout(0.5))
-model.add(Dense(6))
-model.add(Activation('softmax'))
-model.compile(loss='binary_crossentropy', optimizer='sgd',
-metrics=['accuracy'])
+    bs = 32                                                    #default batch size
+    model = Sequential()
+    model.add(Conv2D(32, (5, 5), data_format='channels_last',
+    input_shape=(28,28,1)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(64, (3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(64, (3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Flatten())
+    model.add(Dense(64))
+    model.add(Activation('relu'))
+    model.add(Dense(32))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(6))
+    model.add(Activation('softmax'))
+    model.compile(loss='binary_crossentropy', optimizer='sgd',
+    metrics=['accuracy'])
 
-history = model.fit(trainX,trainY, epochs=100, batch_size=bs, verbose=1)
+    history = model.fit(trainX,trainY, epochs=100, batch_size=bs, verbose=1)
 
-pickle.dump(history.history, open('save4.p','wb'))
+    pickle.dump(history.history, open('save4.p','wb'))
 
-score_train = model.evaluate(trainX, trainY, batch_size=bs, verbose=1)
-score_test = model.evaluate(testX, testY, batch_size=bs, verbose=1)
+    score_train = model.evaluate(trainX, trainY, batch_size=bs, verbose=1)
+    score_test = model.evaluate(testX, testY, batch_size=bs, verbose=1)
 
-model_yaml = model.to_yaml()
-with open("model4.yaml", "w") as yaml_file:
-    yaml_file.write(model_yaml)
+    model_yaml = model.to_yaml()
+    with open("model4.yaml", "w") as yaml_file:
+        yaml_file.write(model_yaml)
 
-model.save_weights("model4.h5")
+    model.save_weights("model4.h5")
