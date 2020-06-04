@@ -26,6 +26,7 @@ def train():
         img1 = Image.open(image_data[x]).convert(mode='L')
         img2 = Image.open(image_data[x + 1]).convert(mode='L')
         vis = np.concatenate((img1, img2), axis=0)
+        vis.resize((28, 28))
         inputs.append(vis)
         label = [float(i) for i in image_data[x + 2].split(',') if i.isdigit()]
         outputs.append(label)
