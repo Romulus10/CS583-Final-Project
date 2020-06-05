@@ -6,6 +6,7 @@ http://nrs.harvard.edu/urn-3:HUL.InstRepos:39011510
 import numpy as np
 from keras.models import model_from_yaml
 import cv2
+import imageio
 
 
 def loadNN(model_file, weights_file):
@@ -36,5 +37,9 @@ def run_network(frame_list):
     recording = []
     mod = loadNN('model.yaml', 'model.h5')
     for x in range(len(frame_list) - 1):
-        recording.append(LK(frame_list[x], frame_list[x+1], mod))
+        first_frame = frame_list[x]
+        second_frame = frame_list[x+1]
+        recording.append(LK(imageio.imread(first_frame)[
+            :, :, :3].astype(np.float32) / 255.0, imageio.imread(second_frame)[
+            :, :, :3].astype(np.float32) / 255.0, mod))
     return recording

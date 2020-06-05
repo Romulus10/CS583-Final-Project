@@ -76,7 +76,7 @@ def train():
 
     history = model.fit(trainX, trainY, epochs=100, batch_size=bs, verbose=1)
 
-    pickle.dump(history.history, open('save4.p', 'wb'))
+    pickle.dump(history.history, open('save.p', 'wb'))
 
     score_train = model.evaluate(trainX, trainY, batch_size=bs, verbose=1)
 
@@ -93,10 +93,10 @@ def train():
     score_test = model.evaluate(testX, testY, batch_size=bs, verbose=1)
 
     model_yaml = model.to_yaml()
-    with open("model4.yaml", "w") as yaml_file:
+    with open("model.yaml", "w") as yaml_file:
         yaml_file.write(model_yaml)
 
-    model.save_weights("model4.h5")
+    model.save_weights("model.h5")
 
 
 if __name__ == '__main__':

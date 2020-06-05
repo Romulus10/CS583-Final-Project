@@ -19,3 +19,6 @@ paper/OpticalFlow.synctex.gz
 save4.p
 model4.h5
 model4.yaml
+model.h5
+model.yaml
+save.p
