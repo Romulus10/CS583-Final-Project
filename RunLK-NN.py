@@ -32,18 +32,9 @@ def LK(frame1, frame2, model):
     return LKvector
 
 
-def run_network():
+def run_network(frame_list):
     recording = []
     mod = loadNN('model.yaml', 'model.h5')
-    cap = cv2.VideoCapture(1)
-    ret1, frame1 = cap.read()
-    ret2, frame2 = cap.read()
-    while(ret1):
-        frame1, frame2 = frame2, frame1
-        ret, frame2 = cap.read()
-        recording.append(LK(frame1, frame2, mod))
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
+    for x in range(len(frame_list) - 1):
+        recording.append(LK(frame_list[x], frame_list[x+1], mod))
+    return recording
