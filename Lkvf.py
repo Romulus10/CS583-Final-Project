@@ -64,15 +64,15 @@ def train():
     model.compile(loss='binary_crossentropy', optimizer='sgd',
                   metrics=['accuracy'])
 
-    #reshape trainY
+    # reshape trainY
     temp = []
-    
+
     for i in range(trainY.shape[0]):
-    
-      temp.append(np.array([trainY[i][0], trainY[i][1], trainY[i][2], trainY[i][3], 0, 0]))
-    
+        temp.append(np.array([trainY[i][0], trainY[i][1],
+                              trainY[i][2], trainY[i][3], 0, 0]))
+
     trainY = np.array(temp)
-    #reshape ends
+    # reshape ends
 
     history = model.fit(trainX, trainY, epochs=100, batch_size=bs, verbose=1)
 
@@ -80,15 +80,15 @@ def train():
 
     score_train = model.evaluate(trainX, trainY, batch_size=bs, verbose=1)
 
-    #reshape testY
+    # reshape testY
     temp = []
-    
+
     for i in range(testY.shape[0]):
-    
-      temp.append(np.array([testY[i][0], testY[i][1], testY[i][2], testY[i][3], 0, 0]))
-    
+        temp.append(
+            np.array([testY[i][0], testY[i][1], testY[i][2], testY[i][3], 0, 0]))
+
     testY = np.array(temp)
-    #reshape ends
+    # reshape ends
 
     score_test = model.evaluate(testX, testY, batch_size=bs, verbose=1)
 
