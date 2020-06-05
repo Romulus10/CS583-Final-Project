@@ -16,3 +16,6 @@ paper/OpticalFlow.pdf
 paper/OpticalFlow.run.xml
 paper/OpticalFlow.synctex.gz
 /train-data.csv
+save4.p
+model4.h5
+model4.yaml

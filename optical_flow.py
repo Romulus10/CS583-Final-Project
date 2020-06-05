@@ -69,16 +69,6 @@ def gaussian_kernel(ksize=5):
     return kernel
 
 
-def apply_mask(array, mask):
-    for x in range(array.shape[0]):
-        for y in range(array.shape[1]):
-            if not mask[x, y, 0]:
-                array[x, y, 0] = 0
-                array[x, y, 1] = 0
-                array[x, y, 2] = 0
-    return array
-
-
 def lucas_kanade(H, I):
     mask = (H.mean(-1) > 0.25) * (I.mean(-1) > 0.25)
     mask = mask[:, :, np.newaxis]
