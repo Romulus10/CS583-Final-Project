@@ -33,9 +33,16 @@ A bachelor's thesis published in 2018 outlined a general procedure for using con
 
 \section{Goals}\label{sec:goals}
 \subsection{Python Implementation}\label{subsec:python-implementation}
+The cited paper's implementation of the Lucas-Kanade optical flow algorithm was originally in Matlab.
+By using the Optical Flow assignment we completed for this course as a starting point, we reimplemented the Lucas-Kanade procedure in pure Python with numpy.
+This work is located in \verb|optical_flow.py|.
+
 \subsection{Pyramidal Lucas-Kanade}\label{subsec:pyramidal-lucas-kanade}
 \subsection{Mini-batch Gradient Descent}\label{subsec:mini-batch-gradient-descent}
 \subsection{Training on Animated Scenes}\label{subsec:training-on-animated-scenes}
+This didn't require any changes in the implementation itself.
+In testing the training process on animated input, all we needed was to select an animated scene, point out a feature to track, and feed the optical flow data through the neural network.
+
 \subsection{Eigenvalue-Based Optical Flow Computation}\label{subsec:eigenvalue-based-optical-flow-computation}
 
 \section{Method}\label{sec:method}
