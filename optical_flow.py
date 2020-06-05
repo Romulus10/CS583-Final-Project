@@ -150,8 +150,8 @@ def pyramid_lucas_kanade(H, I, initial_d, levels, steps):
 
 
 def track_object(frame1, frame2, x, y, w, h, steps):
-    H = frame1[y:y+h, x:x+w]
-    I = frame2[y:y+h, x:x+w]
+    H = frame1
+    I = frame2
 
     levels = np.floor(np.log(w if w < h else h))
 
