@@ -93,6 +93,12 @@ def lucas_kanade(H, I):
 
     AtA = np.array([[Ixx.sum(), Ixy.sum()],
                     [Ixy.sum(), Iyy.sum()]])
+                    
+    eig_vals, eig_vecs = np.linalg.eig(AtA)
+
+    AtA = np.array([[eig_vals[0], 0],
+                    [0, eig_vals[1]]])
+                    
     Atb = -np.array([Ixt.sum(), Iyt.sum()])
 
     displacement = np.linalg.solve(AtA, Atb)
