@@ -1,5 +1,8 @@
 """
-This file adapted from Sean Batzel's submission to Homework 2.
+This file adapted from Sean Batzel's submission to Lucas-Kanade implementation.
+
+Portions adapted from "The Implementation of Optical Flow in Neural Networks",
+Nicole Ku'ulei-lani Flett http://nrs.harvard.edu/urn-3:HUL.InstRepos:39011510
 """
 
 import argparse
@@ -12,6 +15,7 @@ from numpy.linalg.linalg import LinAlgError
 
 
 def bilinear_interp(image, points):
+    # Lucas-Kanade implementation - Unmodified from skeleton code
     points = np.asarray(points)
     if points.ndim == 1:
         points = points[np.newaxis]
@@ -39,6 +43,7 @@ def bilinear_interp(image, points):
 
 
 def translate(image, displacement):
+    # Lucas-Kanade implementation - Unmodified from skeleton code
     pts = np.mgrid[:image.shape[0], :image.shape[1]
                    ].transpose(1, 2, 0).astype(np.float32)
     pts -= displacement[::-1]
@@ -47,6 +52,7 @@ def translate(image, displacement):
 
 
 def convolve_img(image, kernel):
+    # Lucas-Kanade implementation - Unmodified from skeleton code
     if kernel.ndim == image.ndim:
         if image.shape[-1] == kernel.shape[-1]:
             return np.dstack([convolve(image[..., c], kernel[..., c]) for c in range(kernel.shape[-1])])
@@ -63,6 +69,7 @@ def convolve_img(image, kernel):
 
 
 def gaussian_kernel(ksize=5):
+    # Lucas-Kanade implementation - Unmodified from skeleton code
     kernel = np.exp(-np.linspace(-(ksize // 2), ksize // 2,
                                  ksize) ** 2 / 2) / np.sqrt(2 * np.pi)
     kernel = np.outer(kernel, kernel)
@@ -71,6 +78,7 @@ def gaussian_kernel(ksize=5):
 
 
 def lucas_kanade(H, I):
+    # Lucas-Kanade implementation - SB
     mask = (H.mean(-1) > 0.25) * (I.mean(-1) > 0.25)
     mask = mask[:, :, np.newaxis]
 
@@ -108,6 +116,7 @@ def lucas_kanade(H, I):
 
 
 def iterative_lucas_kanade(H, I, steps):
+    # Adapted from L-K submission.
     disp = np.zeros((2,), np.float32)
     for i in range(steps):
         tranlated_H = translate(H, disp)
@@ -118,6 +127,7 @@ def iterative_lucas_kanade(H, I, steps):
 
 
 def gaussian_pyramid(image, levels):
+    # Adapted from L-K submission.
     kernel = gaussian_kernel()
 
     pyr = [image]
@@ -132,6 +142,7 @@ def gaussian_pyramid(image, levels):
 
 
 def pyramid_lucas_kanade(H, I, initial_d, levels, steps):
+    # Adapted from L-K submission.
     initial_d = np.asarray(initial_d, dtype=np.float32)
 
     pyramid_H = gaussian_pyramid(H, levels)
@@ -151,6 +162,7 @@ def pyramid_lucas_kanade(H, I, initial_d, levels, steps):
 
 
 def track_object(frame1, frame2, x, y, w, h, steps):
+    # Adapted from L-K submission skeleton code.
     H = frame1[y:y+h, x:x+w]
     I = frame2[y:y+h, x:x+w]
 
@@ -176,6 +188,7 @@ def track_object(frame1, frame2, x, y, w, h, steps):
 
 
 def run_lk(first_frame, second_frame, x, y, w, h, steps):
+    # Adapted from L-K submission.
     first = imageio.imread(first_frame)[
         :, :, :3].astype(np.float32) / 255.0
     second = imageio.imread(second_frame)[
@@ -184,6 +197,7 @@ def run_lk(first_frame, second_frame, x, y, w, h, steps):
 
 
 def prepare_dataset(files_list, result_file, x, y, w, h, steps=5):
+    # Adapted from the CSV writer in the original Matlab code in the reference material.
     import csv
     flow_vector = [0, 0, 0, 0, 0, 0]
     with open(result_file, 'w', newline='') as csvfile:

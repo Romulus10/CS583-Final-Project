@@ -1,8 +1,8 @@
 """
-Adapted from "The Implementation of Optical Flow in Neural Networks", Nicole Ku'ulei-lani Flett http://nrs.harvard.edu/urn-3:HUL.InstRepos:39011510
+Adapted from "The Implementation of Optical Flow in Neural Networks",
+Nicole Ku'ulei-lani Flett http://nrs.harvard.edu/urn-3:HUL.InstRepos:39011510
 """
 
-import pickle
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
@@ -22,6 +22,7 @@ def train():
     inputs = []
     outputs = []
 
+    # inputs and outputs match the reference material
     x = 0
     while x < len(image_data) - 4:
         img1 = Image.open(image_data[x]).convert(mode='L')
@@ -36,13 +37,14 @@ def train():
     inputs = np.array(inputs, dtype="float") / 255.0
     outputs = np.array(outputs)
 
-    (trainX, testX, trainY, testY) = train_test_split(
-        inputs, outputs, test_size=0.25)
+    (trainX, testX, trainY, testY) = train_test_split(inputs, outputs, test_size=0.25)
 
     trainX = np.reshape(trainX, (trainX.shape[0], 28, 28, -1))
     testX = np.reshape(testX, (testX.shape[0], 28, 28, -1))
 
-    bs = 32  # default batch size
+    bs = 32  # Changed to 32 for the mini-batch gradient descent
+
+    # Model adapted from reference material, with parameters modified
     model = Sequential()
     model.add(Conv2D(32, (5, 5), data_format='channels_last',
                      input_shape=(28, 28, 1)))
@@ -65,7 +67,6 @@ def train():
     model.compile(loss='binary_crossentropy', optimizer='sgd',
                   metrics=['accuracy'])
 
-    # reshape trainY
     temp = []
 
     for i in range(trainY.shape[0]):
@@ -73,23 +74,17 @@ def train():
                               trainY[i][2], trainY[i][3], 0, 0]))
 
     trainY = np.array(temp)
-    # reshape ends
 
     history = model.fit(trainX, trainY, epochs=500, batch_size=bs, verbose=1)
 
-    pickle.dump(history.history, open('save.p', 'wb'))
-
     score_train = model.evaluate(trainX, trainY, batch_size=bs, verbose=1)
 
-    # reshape testY
     temp = []
 
     for i in range(testY.shape[0]):
-        temp.append(
-            np.array([testY[i][0], testY[i][1], testY[i][2], testY[i][3], 0, 0]))
+        temp.append(np.array([testY[i][0], testY[i][1], testY[i][2], testY[i][3], 0, 0]))
 
     testY = np.array(temp)
-    # reshape ends
 
     score_test = model.evaluate(testX, testY, batch_size=bs, verbose=1)
 
@@ -100,7 +95,6 @@ def train():
     model.save_weights("model.h5")
 
     return history
-
 
 
 if __name__ == '__main__':
