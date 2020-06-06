@@ -75,7 +75,7 @@ def train():
     trainY = np.array(temp)
     # reshape ends
 
-    history = model.fit(trainX, trainY, epochs=100, batch_size=bs, verbose=1)
+    history = model.fit(trainX, trainY, epochs=500, batch_size=bs, verbose=1)
 
     pickle.dump(history.history, open('save.p', 'wb'))
 

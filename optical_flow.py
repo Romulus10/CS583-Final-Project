@@ -8,6 +8,7 @@ import logging
 import imageio
 import numpy as np
 from scipy.ndimage.filters import convolve
+from numpy.linalg.linalg import LinAlgError
 
 
 def bilinear_interp(image, points):
@@ -189,8 +190,13 @@ def prepare_dataset(files_list, result_file, x, y, w, h, steps=5):
         writer = csv.writer(csvfile, delimiter=',',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
         for i in range(len(files_list) - 1):
-            flow_vector = run_lk(files_list[i], files_list[i + 1], x + flow_vector[0] +
-                                 flow_vector[1], y + flow_vector[2] + flow_vector[3], w, h, steps)
-            writer.writerow([files_list[i]])
-            writer.writerow([files_list[i + 1]])
-            writer.writerow(flow_vector)
+            x_coord = x - flow_vector[0] + flow_vector[1]
+            y_coord = y - flow_vector[2] + flow_vector[3]
+            try:
+                flow_vector = run_lk(files_list[i], files_list[i + 1], x_coord, y_coord, w, h, steps)
+                writer.writerow([files_list[i]])
+                writer.writerow([files_list[i + 1]])
+                writer.writerow(flow_vector)
+            except LinAlgError:
+                # In the case that the matrix is singular, just ignore.
+                pass
