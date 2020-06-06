@@ -6,6 +6,7 @@ import pickle
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
+from keras.utils import plot_model
 import numpy as np
 from sklearn.model_selection import train_test_split
 from PIL import Image
@@ -97,6 +98,9 @@ def train():
         yaml_file.write(model_yaml)
 
     model.save_weights("model.h5")
+
+    return history
+
 
 
 if __name__ == '__main__':

@@ -33,13 +33,17 @@ def LK(frame1, frame2, model):
     return LKvector
 
 
-def run_network(frame_list):
+def run_network(frame_list, x, y, w, h):
     recording = []
     mod = loadNN('model.yaml', 'model.h5')
+    flow_vector = [0, 0, 0, 0, 0, 0]
     for x in range(len(frame_list) - 1):
-        first_frame = frame_list[x]
-        second_frame = frame_list[x+1]
-        recording.append(LK(imageio.imread(first_frame)[
+        first_frame = frame_list[x][int(y+flow_vector[2]+flow_vector[3]):int(y+flow_vector[2] +
+                                                                             flow_vector[3]+h), int(x+flow_vector[0]+flow_vector[1]):int(x+flow_vector[0]+flow_vector[1]+w)]
+        second_frame = frame_list[x+1][int(y+flow_vector[2]+flow_vector[3]):int(y+flow_vector[2] +
+                                                                                flow_vector[3]+h), int(x+flow_vector[0]+flow_vector[1]):int(x+flow_vector[0]+flow_vector[1]+w)]
+        flow_vector = LK(imageio.imread(first_frame)[
             :, :, :3].astype(np.float32) / 255.0, imageio.imread(second_frame)[
-            :, :, :3].astype(np.float32) / 255.0, mod))
+            :, :, :3].astype(np.float32) / 255.0, mod)
+        recording.append(flow_vector)
     return recording
