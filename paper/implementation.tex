@@ -1,0 +1,49 @@
+We have taken the original implementation by Flett, the code for which was available in the paper, and have made our modifications and improvements and modifications to it.
+The artifacts of our work can be found at \url{https://github.com/Romulus10/CS583-Final-Project}.
+
+\subsection{Pyramidal Lucas-Kanade}\label{subsec:pyramidal-lucas-kanade}
+Pyramidal execution of the classical Lucas-Kanade algorithm is used to deal with large pixel flows for small window of integration and to get higher accuracy.
+An image is represented in the form of a pyramid.
+If an image $I$ has width $n_x$ and height $n_y$, then pyramidal form of that image is obtained in a recursive manner: $I^1$ from $I^0$, $I^2$ from $I^1$ and so on.
+Given a point $u$ in the first frame/image, the corresponding location $v=u+d$ in the second frame/image is tracked, where $d$ is the displacement vector.
+When two images along with initial displacement is provided as input, pyramidal forms the images are built and updated displacement is computed at each level using iterative optical flow computation.
+We used multiple images with motion flows between them and calculated optical flow for our data-set using the pyramidal Lucas-Kanade method, and used the results from this to train the convolutional neural network~\cite{bouguet}.
+
+\subsection{Mini-batch Gradient Descent}\label{subsec:mini-batch-gradient-descent}
+The cited paper had used stochastic gradient descent optimizer method to train the neural networks and update weights to nodes across the network.
+Current state of the model is used to make a prediction and prediction is compared against the expected values to find the error gradient.
+Computed error gradient is used to update the weights of the model repeatedly.
+In the Stochastic algorithms the batch size is set to 1 and it use only one example at a time.
+Since stochastic use only one example at a time, it is not possible to implement the vectorized implementation and it could slow down the computations.
+In order to handle this problem, we have used the mini-batch gradient descent in our implementation for which the batch size is set greater than 1 and less than the number of training samples $1 < bs < m$, where bs is the batch size and m is the total number of examples in the training set$)$.
+We have used a batch size of 32 in our implementation\cite{brownlee}.
+
+\subsection{Eigenvalue-Based Optical Flow Computation}\label{subsec:eigenvalue-based-optical-flow-computation}
+Motion is estimated of each pixel of an image and then motion of entire image is computed.
+In order to address the problem when we have more equations than unknowns, we used least squares method to address it.
+Equation could be represented as follows
+\begin{center}
+    $(A^T A) d = A^T b$
+\end{center}
+\setlength{\parskip}{10pt plus 1pt minus 1pt}
+where  $ A^T A =  \begin{bmatrix}
+                      \Sigma I_x{xI}x & \Sigma I_x{xI}y \\
+                      \Sigma I_x{xI}y & \Sigma I_y{yI}y
+\end{bmatrix} $  and $A^T b = \begin{bmatrix}
+                                  \Sigma I_x{xI}t \\
+                                  \Sigma I_y{yI}t
+\end{bmatrix}$
+\setlength{\parskip}{10pt plus 1pt minus 1pt}
+
+In order to solve the above equation, $A^T A$ must be invertible (eigenvalues of $A^T A$ should be $\lambda_1 \geq \lambda_2 > 0$).
+To solve for displacement with the above matrices, instead of the least squares approach in the original paper, we have computed eigenvalues of the $A^T A$ matrix, and used them in the calculation of the displacement instead of the matrices themselves.
+
+\subsection{Python Implementation}\label{subsec:python-implementation}
+The cited paper's implementation of the Lucas-Kanade optical flow algorithm was originally written in MATLAB\@.
+By using the Optical Flow assignment we completed for this course as a starting point, we re-implemented the Lucas-Kanade procedure in pure Python with \texttt{numpy}.
+This work is located in \verb|optical_flow.py|.
+Since \texttt{numpy} is open source, in contrast to MATLAB, our implementation can be easily adopted by researchers and engineers looking to use this work.
+
+\subsection{Training on Animated Scenes}\label{subsec:training-on-animated-scenes}
+This didn't require any changes in the implementation itself.
+In testing the training process on animated input, all we needed was to select an animated scene, point out a set of features to track, and feed the optical flow data through the neural network.

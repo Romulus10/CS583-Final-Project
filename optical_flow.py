@@ -1,12 +1,12 @@
 """
 This file adapted from Sean Batzel's submission to Lucas-Kanade implementation.
 
+Sections indicated to be adapted or unmodified from skeleton code are from assignment
+code from Dr. Lou Kratz (CS 583, Drexel University).
+
 Portions adapted from "The Implementation of Optical Flow in Neural Networks",
 Nicole Ku'ulei-lani Flett http://nrs.harvard.edu/urn-3:HUL.InstRepos:39011510
 """
-
-import argparse
-import logging
 
 import imageio
 import numpy as np
@@ -35,17 +35,14 @@ def bilinear_interp(image, points):
     b = fpart[..., 0:1]
     a = fpart[..., 1:2]
 
-    top = (1 - a) * image[tl[..., 0], tl[..., 1]] + \
-        a * image[tr[..., 0], tr[..., 1]]
-    bot = (1 - a) * image[bl[..., 0], bl[..., 1]] + \
-        a * image[br[..., 0], br[..., 1]]
+    top = (1 - a) * image[tl[..., 0], tl[..., 1]] + a * image[tr[..., 0], tr[..., 1]]
+    bot = (1 - a) * image[bl[..., 0], bl[..., 1]] + a * image[br[..., 0], br[..., 1]]
     return ((1 - b) * top + b * bot) * valid[..., np.newaxis]
 
 
 def translate(image, displacement):
     # Lucas-Kanade implementation - Unmodified from skeleton code
-    pts = np.mgrid[:image.shape[0], :image.shape[1]
-                   ].transpose(1, 2, 0).astype(np.float32)
+    pts = np.mgrid[:image.shape[0], :image.shape[1]].transpose(1, 2, 0).astype(np.float32)
     pts -= displacement[::-1]
 
     return bilinear_interp(image, pts)
@@ -59,27 +56,24 @@ def convolve_img(image, kernel):
         elif image.ndim == 2:
             return convolve(image, kernel)
         else:
-            raise RuntimeError("Invalid kernel shape. Kernel: %s Image: %s" % (
-                kernel.shape, image.shape))
+            raise RuntimeError("Invalid kernel shape. Kernel: %s Image: %s" % (kernel.shape, image.shape))
     elif kernel.ndim == image.ndim - 1:
         return np.dstack([convolve(image[..., c], kernel) for c in range(image.shape[-1])])
     else:
-        raise RuntimeError("Invalid kernel shape. Kernel: %s Image: %s" % (
-            kernel.shape, image.shape))
+        raise RuntimeError("Invalid kernel shape. Kernel: %s Image: %s" % (kernel.shape, image.shape))
 
 
 def gaussian_kernel(ksize=5):
     # Lucas-Kanade implementation - Unmodified from skeleton code
-    kernel = np.exp(-np.linspace(-(ksize // 2), ksize // 2,
-                                 ksize) ** 2 / 2) / np.sqrt(2 * np.pi)
+    kernel = np.exp(-np.linspace(-(ksize // 2), ksize // 2, ksize) ** 2 / 2) / np.sqrt(2 * np.pi)
     kernel = np.outer(kernel, kernel)
     kernel /= kernel.sum()
     return kernel
 
 
-def lucas_kanade(H, I):
+def lucas_kanade(h, i):
     # Lucas-Kanade implementation - SB
-    mask = (H.mean(-1) > 0.25) * (I.mean(-1) > 0.25)
+    mask = (h.mean(-1) > 0.25) * (i.mean(-1) > 0.25)
     mask = mask[:, :, np.newaxis]
 
     kernel_x = np.array([[1., 0., -1.],
@@ -90,38 +84,38 @@ def lucas_kanade(H, I):
                          [0., 0., 0.],
                          [-1., -2., -1.]]) / 8.
 
-    I_x = convolve_img(I, kernel_x)
-    I_y = convolve_img(I, kernel_y)
-    I_t = I - H
+    i_x = convolve_img(i, kernel_x)
+    i_y = convolve_img(i, kernel_y)
+    i_t = i - h
 
-    Ixx = (I_x * I_x) * mask
-    Ixy = (I_x * I_y) * mask
-    Iyy = (I_y * I_y) * mask
-    Ixt = (I_x * I_t) * mask
-    Iyt = (I_y * I_t) * mask
+    ixx = (i_x * i_x) * mask
+    ixy = (i_x * i_y) * mask
+    iyy = (i_y * i_y) * mask
+    ixt = (i_x * i_t) * mask
+    iyt = (i_y * i_t) * mask
 
-    AtA = np.array([[Ixx.sum(), Ixy.sum()],
-                    [Ixy.sum(), Iyy.sum()]])
-                    
-    eig_vals, eig_vecs = np.linalg.eig(AtA)
+    at_a = np.array([[ixx.sum(), ixy.sum()],
+                    [ixy.sum(), iyy.sum()]])
 
-    AtA = np.array([[eig_vals[0], 0],
+    eig_vals, eig_vecs = np.linalg.eig(at_a)
+
+    ata = np.array([[eig_vals[0], 0],
                     [0, eig_vals[1]]])
-                    
-    Atb = -np.array([Ixt.sum(), Iyt.sum()])
 
-    displacement = np.linalg.solve(AtA, Atb)
+    atb = -np.array([ixt.sum(), iyt.sum()])
 
-    return displacement, AtA, Atb
+    displacement = np.linalg.solve(ata, atb)
+
+    return displacement, ata, atb
 
 
-def iterative_lucas_kanade(H, I, steps):
+def iterative_lucas_kanade(h, i, steps):
     # Adapted from L-K submission.
     disp = np.zeros((2,), np.float32)
-    for i in range(steps):
-        tranlated_H = translate(H, disp)
+    for x in range(steps):
+        tranlated_h = translate(h, disp)
 
-        disp += lucas_kanade(tranlated_H, I)[0]
+        disp += lucas_kanade(tranlated_h, i)[0]
 
     return disp
 
@@ -141,36 +135,36 @@ def gaussian_pyramid(image, levels):
     return pyr
 
 
-def pyramid_lucas_kanade(H, I, initial_d, levels, steps):
+def pyramid_lucas_kanade(h, i, initial_d, levels, steps):
     # Adapted from L-K submission.
     initial_d = np.asarray(initial_d, dtype=np.float32)
 
-    pyramid_H = gaussian_pyramid(H, levels)
-    pyramid_I = gaussian_pyramid(I, levels)
+    pyramid_h = gaussian_pyramid(h, levels)
+    pyramid_i = gaussian_pyramid(i, levels)
 
     disp = initial_d / 2. ** levels
     for level in range(int(levels)):
         disp *= 2
 
-        level_H = pyramid_H[-(1 + level)]
-        level_I = pyramid_I[-(1 + level)]
+        level_h = pyramid_h[-(1 + level)]
+        level_i = pyramid_i[-(1 + level)]
 
-        level_I_displaced = translate(level_I, -disp)
-        disp += iterative_lucas_kanade(level_H, level_I_displaced, steps)
+        level_i_displaced = translate(level_i, -disp)
+        disp += iterative_lucas_kanade(level_h, level_i_displaced, steps)
 
     return disp
 
 
 def track_object(frame1, frame2, x, y, w, h, steps):
     # Adapted from L-K submission skeleton code.
-    H = frame1[y:y+h, x:x+w]
-    I = frame2[y:y+h, x:x+w]
+    h_image = frame1[y:y + h, x:x + w]
+    i_image = frame2[y:y + h, x:x + w]
 
     levels = np.floor(np.log(w if w < h else h))
 
     initial_displacement = np.array([0, 0])
 
-    flow = pyramid_lucas_kanade(H, I, initial_displacement, levels, steps)
+    flow = pyramid_lucas_kanade(h_image, i_image, initial_displacement, levels, steps)
 
     final_flow = [0, 0, 0, 0, 0, 0]
 
@@ -189,10 +183,8 @@ def track_object(frame1, frame2, x, y, w, h, steps):
 
 def run_lk(first_frame, second_frame, x, y, w, h, steps):
     # Adapted from L-K submission.
-    first = imageio.imread(first_frame)[
-        :, :, :3].astype(np.float32) / 255.0
-    second = imageio.imread(second_frame)[
-        :, :, :3].astype(np.float32) / 255.0
+    first = imageio.imread(first_frame)[:, :, :3].astype(np.float32) / 255.0
+    second = imageio.imread(second_frame)[:, :, :3].astype(np.float32) / 255.0
     return track_object(first, second, int(x), int(y), int(w), int(h), steps)
 
 
@@ -207,7 +199,8 @@ def prepare_dataset(files_list, result_file, x, y, w, h, steps=5):
             x_coord = x - flow_vector[0] + flow_vector[1]
             y_coord = y - flow_vector[2] + flow_vector[3]
             try:
-                flow_vector = run_lk(files_list[i], files_list[i + 1], x_coord, y_coord, w, h, steps)
+                flow_vector = run_lk(
+                    files_list[i], files_list[i + 1], x_coord, y_coord, w, h, steps)
                 writer.writerow([files_list[i]])
                 writer.writerow([files_list[i + 1]])
                 writer.writerow(flow_vector)

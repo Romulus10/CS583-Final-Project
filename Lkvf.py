@@ -37,10 +37,10 @@ def train():
     inputs = np.array(inputs, dtype="float") / 255.0
     outputs = np.array(outputs)
 
-    (trainX, testX, trainY, testY) = train_test_split(inputs, outputs, test_size=0.25)
+    (train_x, test_x, train_y, test_y) = train_test_split(inputs, outputs, test_size=0.25)
 
-    trainX = np.reshape(trainX, (trainX.shape[0], 28, 28, -1))
-    testX = np.reshape(testX, (testX.shape[0], 28, 28, -1))
+    train_x = np.reshape(train_x, (train_x.shape[0], 28, 28, -1))
+    test_x = np.reshape(test_x, (test_x.shape[0], 28, 28, -1))
 
     bs = 32  # Changed to 32 for the mini-batch gradient descent
 
@@ -69,24 +69,23 @@ def train():
 
     temp = []
 
-    for i in range(trainY.shape[0]):
-        temp.append(np.array([trainY[i][0], trainY[i][1],
-                              trainY[i][2], trainY[i][3], 0, 0]))
+    for i in range(train_y.shape[0]):
+        temp.append(np.array([train_y[i][0], train_y[i][1], train_y[i][2], train_y[i][3], 0, 0]))
 
-    trainY = np.array(temp)
+    train_y = np.array(temp)
 
-    history = model.fit(trainX, trainY, epochs=500, batch_size=bs, verbose=1)
+    history = model.fit(train_x, train_y, epochs=500, batch_size=bs, verbose=1)
 
-    score_train = model.evaluate(trainX, trainY, batch_size=bs, verbose=1)
+    model.evaluate(train_x, train_y, batch_size=bs, verbose=1)
 
     temp = []
 
-    for i in range(testY.shape[0]):
-        temp.append(np.array([testY[i][0], testY[i][1], testY[i][2], testY[i][3], 0, 0]))
+    for i in range(test_y.shape[0]):
+        temp.append(np.array([test_y[i][0], test_y[i][1], test_y[i][2], test_y[i][3], 0, 0]))
 
-    testY = np.array(temp)
+    test_y = np.array(temp)
 
-    score_test = model.evaluate(testX, testY, batch_size=bs, verbose=1)
+    model.evaluate(test_x, test_y, batch_size=bs, verbose=1)
 
     model_yaml = model.to_yaml()
     with open("model.yaml", "w") as yaml_file:
