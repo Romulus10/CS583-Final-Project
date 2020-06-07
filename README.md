@@ -7,5 +7,7 @@
 ##### Description of other files
 
 *optical_flow.py* - Contains code that calculates optical flow using the pyramidal Lucas-Kanade to be used to train the CNN
+
 *Lkvf.py* - Contains code related to training the CNN model
+
 *RunLKNN.py* - Contains code to calculate optical flow using the CNN
